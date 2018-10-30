@@ -1,0 +1,10 @@
+<div class="comments">
+    <span ng-if="!$controller.element.editComment" ng-click="toogleComment($controller.element)" ng-bind-html="$controller.element.comment?$controller.element.comment:'Comentarios'"></span>
+    <div class="editor" ng-if="$controller.element.editComment">
+        <textarea class="form-control" ng-model="$controller.element.comment"></textarea>
+        <div class="buttons" role="group">
+            <button ng-click="toogleComment($controller.element, $controller.onSave)" type="button" class="btn btn-success btn-sm"><i class="material-icons">check</i></button>
+            <button ng-click="toogleComment($controller.element)" type="button" class="btn btn-danger btn-sm"><i class="material-icons">close</i></button>
+        </div>
+    </div>
+</div>

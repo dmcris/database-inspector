@@ -8,28 +8,103 @@
     margin-bottom: 15px;
 }
 
-nav.navbar{
+nav.navbar.principal{
+    width: 100%;
     background-color: #f29532;
+    position: fixed;
+    top: 0px;
+    z-index: 99;
+}
+
+nav.navbar.resumen{
+    background-color: #d6d8db;
+    background-image: url(https://www.google.com/a/cpanel/babel.es/images/logo.gif?service=google_gsuite);
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position-x: right;
+    position: fixed;
+    z-index: 50;
+    width: 100%;
+    top: 118px;
 }
 
 /* Estilos propios */
+body{
+    background-color: #e9ecef;
+}
+.header{
+    width: 100%;
+    margin: 5px 15px;
+}
+.header .info{
+    float: right;
+    color: white;
+}
+
+.header .info span{
+    display: block;
+}
+
+h1, h2, h3, h4, h5{
+    color: #212F3D;
+}
+
+.lateral-menu{
+    width: 250px;
+    position: fixed;
+    top: 158px;
+    z-index: 50;
+    background: whitesmoke;
+    overflow-y: scroll;
+    height: 100%;
+    padding: 10px 5px;
+}
+.lateral-menu .schemas li{
+    list-style-image: url('img/schema.png');
+}
+
+.lateral-menu .tables li{
+    list-style-image: url('img/table.png');
+    font-size: small;
+}
+
+.lateral-menu .schemas li a{
+    color: #212F3D;
+}
+
+.lateral-menu .tables li a{
+    color: #515A5A;
+}
+
+.model{
+    width: 100%;
+    margin-left: 250px;
+}
+.content{
+    display: flex;
+    margin-top: 165px;
+}
 .link{
     cursor: pointer;
 }
 h1, h2, h3 {
     font-variant: small-caps;
 }
+.margin-top{
+    margin-top: 10px;
+}
 .loading-mask{
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(255, 255, 255, 0.7);
     background-image: url(img/loading.gif);
     background-repeat: no-repeat;
     background-position: center;
     display: none;
     top: 0px;
     left: 0px;
+    z-index: 999;
 }
 .db-table{
     padding: 15px 15px 0px 15px;
@@ -54,4 +129,33 @@ h1, h2, h3 {
 }
 .column-identity{
     color: #2E86C1;
+}
+.comments{
+    display: inline;
+}
+.comments .editor{
+    display: flex;
+}
+.comments span{
+    cursor: pointer;
+    font-style: italic;
+    font-size: small;
+}
+.comments .buttons{
+    width: 60px;
+    padding: 5px;
+}
+.comments button{
+    height: 34px;
+    margin-bottom: 5px;
+}
+.hide{
+    height: 0px;
+    display: none;
+}
+.right{
+    float: right;
+}
+.flex{
+    display: flex;
 }

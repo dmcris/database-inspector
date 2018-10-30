@@ -52,7 +52,23 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+	<profiles>
+		<profile>
+		    <id>app_internas</id>
+		    <activation>
+		    	<activeByDefault>true</activeByDefault>
+		    </activation>
+		    <properties>
+		    	<model.scannedDatabases>BabelnetAplicaciones,BabelNetERP,BabelWWFPersistance,Evaluaciones360_temp,BabelnetSenaar,SGFP_API_Rest,BabelnetAplicaciones_temp,Evaluaciones360,BabelnetDashboard,BabelnetAplicaciones_FP,BabelnetAplicaciones_BI,BabelnetAplicaciones_PRUEBA,PruebaExcel</model.scannedDatabases>
+		    	<host>srvsql2012des</host>
+				<spring.datasource.url>jdbc:sqlserver://srvsql2012des\\intranetman;</spring.datasource.url>
+				<spring.datasource.username>user.babelnetaplicaciones_bi</spring.datasource.username>
+				<spring.datasource.password>A12345a.</spring.datasource.password>
+				<server.port>80</server.port>
+				<server.servlet.context-path>/</server.servlet.context-path>
+	    	</properties>
+	    </profile>
+	</profiles>
 	<build>
 		<plugins>
 			<plugin>
@@ -60,7 +76,13 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+        </resource>
+    </resources>
 	</build>
-
+	
 
 </project>

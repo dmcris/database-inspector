@@ -6,7 +6,7 @@ Este proyecto, construído con un backend java, SpringBoot y un frontend en Angu
 <p>Como características principales permite:</p>
 <ul>
 	<li>Listar los esquemas, tablas y columnas de una base de datos.</li>
-	<li>Visualizar y editar los comentarios de tablas y columnas.</li>
+	<li>Visualizar y editar los comentarios de bases de datos, esquemas, tablas y columnas.</li>
 	<li>Filtrar los resultados por nombre del esquema o tabla.</li>
 	<li>Comprobar los elementos pendientes de documentar.</li>
 </ul>

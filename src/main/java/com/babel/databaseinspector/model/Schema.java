@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.util.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Schema {
@@ -11,6 +13,7 @@ public class Schema {
 	@JsonIgnore
 	private Map<String, Table> mTables;
 	private String name;
+	private String comment;
 	
 	Schema (String name){
 		this.name = name;
@@ -27,7 +30,11 @@ public class Schema {
 	}
 	
 	public <X extends ColumnData> void addColulmnData(X data) {
-		mTables.get(data.getTable()).addColumnData(data);
+		if(data instanceof ObjectComment && StringUtils.isEmpty(data.getTable())) {
+			setComment(((ObjectComment)data).getComment());
+		}else{
+			mTables.get(data.getTable()).addColumnData(data);
+		}
 	}
 	
 	public Collection<Table> getTables(){
@@ -48,6 +55,14 @@ public class Schema {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 	
 }

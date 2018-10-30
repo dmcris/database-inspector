@@ -8,7 +8,7 @@
     /** @ngInject */
     function Service(){
 
-        this.URL = 'http://localhost:8080/';
+        this.URL = '/';
     }
 
 }());
