@@ -1,0 +1,5 @@
+FRONT:
+- Editar comentarios
+- Mostrar resumen búsqueda
+- Porcentaje comentarios por completar
+- Mejoras visuales en filtro (ocultar padres cuando no hay hijos)

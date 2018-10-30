@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="es-ES">
 <header>
+  <meta charset="UTF-8">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
     crossorigin="anonymous">
   <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+  <!--Angular-->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-aria.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-messages.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-sanitize.js"></script>
+
+  <!--Angular modules-->
+
 
   <!--Bootstrap-->
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-    crossorigin="anonymous"></script>
+  <script src="js/lib/jquery-3.3.1.min.js"></script>
+  <script src="js/lib/jquery-ui.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
     crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
@@ -25,7 +32,9 @@
   <script src="js/services/http.service.js"></script>
   <script src="js/services/model.service.js"></script>
   <script src="js/services/util.service.js"></script>
-  <script src="js/components/modelTable.component.js"></script>
+  <script src="js/components/modelTable/modelTable.component.js"></script>
+  <script src="js/components/comments/comments.component.js"></script>
+
   <script>
     $(function () {
 
@@ -33,7 +42,7 @@
     // Inicia los componentes de bootstrap tras 1s
     function iniciarBootstrap() {
       setTimeout(() => {
-        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="tooltip"]').tooltip({ html: true })
       }, 1000);
     }
   </script>
@@ -42,7 +51,14 @@
 <body>
   <div ng-app="app" ng-controller="appController">
     <div>
-      <nav class="navbar navbar-light" style="margin-bottom: 15px;">
+      <nav class="navbar navbar-light principal">
+        <div class="header">
+          <img class="title" src="css/img/title.png" />
+          <div class="info">
+            <span class="connectionHost">Servidor {{info.host}}</span>
+            <span class="version">Versión {{info.version}}</span>
+          </div>
+        </div>
         <div class="input-group col-md-12">
           <!-- Filtro -->
           <div class="input-group-prepend">
@@ -52,24 +68,54 @@
             <option value="" disabled selected>Seleciona una BB.DD.</option>
             <option ng-repeat="database in databases" value="{{database}}">{{database}}</option>
           </select>
-          <input ng-model="filtro.schema" type="text" class="form-control" placeholder="Esquema" aria-label="Username">
-          <input ng-model="filtro.table" type="text" class="form-control" placeholder="Tabla" aria-label="Username">
+          <input ng-model="filtro.schema" type="text" class="form-control" placeholder="Esquema" aria-label="Esquema">
+          <input ng-model="filtro.table" type="text" class="form-control" placeholder="Tabla" aria-label="Tabla">
+          <input ng-model="filtro.column" type="text" class="form-control" placeholder="Columna" aria-label="Columna">
         </div>
       </nav>
-      <!-- Modelo -->
-      <div id="schemas" ng-if="modelo" class="container">
-        <div ng-repeat="schema in modelo.schemas | filter: {'name': filtro.schema}" class="card schema">
-          <!--Esquema-->
-          <div id="schema_header_{{$index}}" class="card-header">
-            <h3 ng-click="collapseSchema(schema)" class="link btn-link" href="#schema_{{$index}}" style="width: 100%;">
-              {{schema.name}}
-            </h3>
+      <!-- Resumen resultados-->
+      <nav ng-if="modelo" class="navbar resumen">
+        <span>Se han encontrado {{numSchemas}} esquemas y {{numTables}} tablas. Avance en la documentaci&oacute;n:
+          Esquemas: {{porSchemaComments*100 | number: 1}}%, Tablas: {{porTableComments*100 | number: 1}}%, Columnas:
+          {{porColumnComments*100 | number: 1}}%</span>
+      </nav>
+      <div ng-if="modelo" class="content">
+        <!-- Menu lateral-->
+        <div class="lateral-menu">
+          <div>
+            <ul ng-model="modelo.schemas" class="schemas">
+              <li ng-repeat="schema in modelo.schemas">
+                <a href="#" ng-click="scrollToElement('schema_'+schema.name)">{{schema.name}}</a>
+                <i class="material-icons link right" ng-click="toogleElement($event)">expand_less</i>
+                <ul ng-model="schema.tables" class="tables colapsable">
+                  <li ng-repeat="table in schema.tables">
+                    <a href="#" ng-click="scrollToElement('table_' + schema.name + '_' + table.name)">{{table.name}}</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
           </div>
-          <!--Tablas del esquema-->
-          <div class="card-body collapse {{(filtro.schema.length > 0 || filtro.table.length > 0 || schema.show) ? 'show':''}}"
-            id="schema_{{$index}}">
-            <div ng-repeat="table in schema.tables | filter: {'name': filtro.table}" class="card db-table">
-              <model-table table="table"></model-table>
+        </div>
+        <!-- Modelo -->
+        <div id="schemas" ng-if="modelo" class="container model">
+          <div id="schema_{{schema.name}}" ng-repeat="schema in modelo.schemas | filter: {'name': filtro.schema}" class="card schema">
+            <!--Esquema-->
+            <div id="schema_header_{{$index}}" class="card-header">
+              <div class="flex">
+                <h3 href="#schema_{{$index}}" style="width: 100%;">
+                  {{schema.name}}
+                </h3>
+                <i class="material-icons link" ng-click="collapseSchema(schema, $event)">expand_less</i>
+              </div>
+              <comments element="schema" on-save="saveComments(schema)"></comments>
+            </div>
+            <!--Tablas del esquema-->
+            <div class="card-body collapse {{(filtro.schema.length > 0 || filtro.table.length > 0 || schema.show) ? 'show':''}}"
+              id="schema_{{$index}}">
+              <div id="table_{{schema.name}}_{{table.name}}" ng-repeat="table in schema.tables | filter: {'name': filtro.table}"
+                class="card db-table">
+                <model-table table="table" filtro="filtro" on-save-comments="saveComments(table)"></model-table>
+              </div>
             </div>
           </div>
         </div>

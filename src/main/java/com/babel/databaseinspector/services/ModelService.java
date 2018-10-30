@@ -56,7 +56,28 @@ public class ModelService {
 		for (ForeignKey fk : fks) {
 			model.addColumnData(fk);
 		}
+		String dbComment = dao.getDatabaseComment(database);
+		model.setComment(dbComment);
 		return model;	
+	}
+	
+	/**
+	 * Actualiza el comentario de la base de datos
+	 * @param database
+	 * @param comment
+	 */
+	public void updateDatabaseComment(String database, String comment) {
+		dao.updateDatabaseComment(database, comment);
+	}
+	
+	/**
+	 * Actualiza el comentario del esquema indicado
+	 * @param database
+	 * @param schema
+	 * @param comment
+	 */
+	public void updateSchemaComment(String database, String schema, String comment) {
+		dao.updateSchemaComment(database, schema, comment);
 	}
 	
 	/**

@@ -1,23 +1,24 @@
+<comments element="$controller.table" on-save="$controller.onSaveComments($controller.table)"></comments>
 <table class="table table-striped table-sm">
     <thead>
         <tr class="table-primary">
-            <th colspan="2">{{$controller.table.name}}</th>
-            <th><button type="button" class="btn btn-primary btn-tabla btn-sm" data-toggle="tooltip" title="{{$controller.table.comment}}">Comentarios</button></th>
+            <th colspan="4">{{$controller.table.name}}</th>
         </tr>
         <tr class="table-secondary">
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Attributos</th>
+            <th>Comentarios</th>
         </tr>
     </thead>
-    <tr ng-repeat="column in $controller.table.columns">
+    <tr ng-repeat="column in $controller.table.columns | filter: {'columnName': $controller.filtro.column}">
         <td><span data-toggle="tooltip" title="{{column.comment}}" class="{{column.isPrimaryKey?'font-weight-bold':''}}">{{column.columnName}}</span></td>
         <td>{{column.dataType}}</td>
         <td class="column-attributes">
             <span ng-if="column.isPrimaryKey" class="primary-key" data-toggle="tooltip" data-placement="top" title="Primary key">PK</span>
             <span ng-if="!column.isNullable" class="column-mandatory" data-toggle="tooltip" data-placement="top" title="Obligatorio">M</span>
             <span ng-if="column.isIdentity" class="column-identity" data-toggle="tooltip" data-placement="top" title="Campo identidad">I</span>
-            <button type="button" class="btn btn-primary btn-tabla btn-sm" data-toggle="tooltip" title="{{column.comment}}">Com.</button>
         </td>
+        <td><comments element="column" on-save="$controller.onSaveComments($controller.column)"></comments></td>
     </tr>
 </table>

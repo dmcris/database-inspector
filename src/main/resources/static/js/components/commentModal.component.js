@@ -3,12 +3,11 @@
 
     angular
         .module ('app')
-        .component ('modelTable', {
+        .component ('commentModal', {
             bindings: {
-                table: '<'
+                modelComponent: '<'
             },
-            templateUrl: 'js/components/modelTable.html',
-            // template: '{{table.name}}',
+            templateUrl: 'js/components/commentModal.html',
             controller: ($scope) => {},
             controllerAs: '$controller'
         });

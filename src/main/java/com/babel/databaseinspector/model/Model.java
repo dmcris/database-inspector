@@ -11,6 +11,8 @@ public class Model {
 	@JsonIgnore
 	private Map<String, Schema> mSchemas;
 	
+	private String comment;
+	
 	public Model(){
 		this.mSchemas = new LinkedHashMap<String, Schema>();
 	}
@@ -38,5 +40,15 @@ public class Model {
 	public void setmSchemas(Map<String, Schema> mSchemas) {
 		this.mSchemas = mSchemas;
 	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	
+	
 	
 }

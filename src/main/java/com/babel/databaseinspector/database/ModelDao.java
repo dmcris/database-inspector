@@ -33,18 +33,20 @@ public class ModelDao {
 						 "	   inner join INFORMATION_SCHEMA.COLUMNS columns on (tables.TABLE_SCHEMA = columns.TABLE_SCHEMA and tables.TABLE_NAME = columns.TABLE_NAME)" + 
 						 "order by tables.table_schema, tables.table_type, tables.table_name, " + 
 						 "		columns.ORDINAL_POSITION";
-	private static final String SQL_COMMENTS = "SELECT s.name \"schema\", t.name \"table\", '' \"column\", cast(td.value AS NVARCHAR(512)) \"comment\"\r\n" + 
+	private static final String SQL_COMMENTS = "SELECT s.name \"schema\", t.name \"table\", '' \"column\", cast(td.value AS NVARCHAR(2048)) \"comment\"\r\n" + 
 			"FROM sys.schemas s\r\n" + 
 			"JOIN sys.tables t ON s.schema_id = t.schema_id\r\n" + 
 			"LEFT OUTER JOIN sys.extended_properties td ON td.major_id = t.object_id AND td.minor_id = 0 AND td.name = 'MS_Description'\r\n" + 
 			"WHERE t.type = 'u'\r\n" + 
 			"union\r\n" + 
-			"SELECT s.name \"schema\", t.name \"table\", c.name \"column\", cast(td.value AS NVARCHAR(512)) \"comment\"\r\n" + 
+			"SELECT s.name \"schema\", t.name \"table\", c.name \"column\", cast(td.value AS NVARCHAR(2048)) \"comment\"\r\n" + 
 			"FROM sys.schemas s\r\n" + 
 			"JOIN sys.tables t ON s.schema_id = t.schema_id\r\n" + 
 			"JOIN sys.columns c ON c.object_id = t.object_id\r\n" + 
 			"LEFT OUTER JOIN sys.extended_properties td ON td.major_id = t.object_id AND td.minor_id = c.column_id AND td.name = 'MS_Description'\r\n" + 
-			"WHERE t.type = 'u'";
+			"WHERE t.type = 'u'"+
+			"union\r\n"+
+			"select s.name \"schema\", '' \"table\", '' \"column\", cast(ep.value AS NVARCHAR(2048)) \"comment\" from sys.schemas s join sys.extended_properties ep on s.schema_id = ep.major_id and ep.class_desc ='SCHEMA' where s.name = 'BSSO'";
 	
 	private static final String SQL_PRIMARY_KEYS = "select constraints.TABLE_SCHEMA \"schema\", \r\n" + 
 			"	   constraints.TABLE_NAME \"table\", \r\n" + 
@@ -69,8 +71,18 @@ public class ModelDao {
 			"left join sys.columns as rc on fk.referenced_object_id = rc.object_id and fk.referenced_column_id = rc.column_id\r\n" + 
 			"order by t.name, c.column_id";
 	
-	private static final String  ADD_TABLE_COMMENT_SQL = "exec sys.sp_addextendedproperty 'MS_Description', ?, 'SCHEMA', ?, 'table', ? ";
-	private static final String  UPDATE_TABLE_COMMENT_SQL = "exec sys.sp_updateextendedproperty 'MS_Description', ?, 'SCHEMA', ?, 'table', ? ";
+	private static final String SQL_DATABASE_COMMENT = "select cast(value AS NVARCHAR(2048)) \"comentario\" from sys.extended_properties where class_desc = 'DATABASE' and name = 'MS_Description'";
+	
+	
+	
+	private static final String  ADD_DATABASE_COMMENT_SQL = "exec sys.sp_addextendedproperty 'MS_Description', ?"; 
+	private static final String  UPDATE_DATABASE_COMMENT_SQL = "exec sys.sp_updateextendedproperty 'MS_Description', ?";
+	private static final String  EXISTS_DATABASE_COMMENT_SQL = "select count(0) from sys.extended_properties where class_desc = 'DATABASE' and name = 'MS_Description'";
+	private static final String  ADD_SCHEMA_COMMENT_SQL = "exec sys.sp_addextendedproperty 'MS_Description', ?, 'SCHEMA', ?"; 
+	private static final String  UPDATE_SCHEMA_COMMENT_SQL = "exec sys.sp_updateextendedproperty 'MS_Description', ?, 'SCHEMA', ?";
+	private static final String  EXISTS_SCHEMA_COMMENT_SQL = "select count(0) from sys.schemas s join sys.extended_properties ep on s.schema_id = ep.major_id and ep.class_desc ='SCHEMA' where s.name = ?";
+	private static final String  ADD_TABLE_COMMENT_SQL = ADD_SCHEMA_COMMENT_SQL + ", 'table', ? ";
+	private static final String  UPDATE_TABLE_COMMENT_SQL = UPDATE_SCHEMA_COMMENT_SQL + ", 'SCHEMA', ?, 'table', ? ";
 	private static final String  EXISTS_TABLE_COMMENT_SQL = "select count(0) from sys.schemas s join sys.tables t on s.schema_id = t.schema_id join sys.extended_properties ep on t.object_id = ep.major_id AND ep.minor_id = 0 and ep.name = 'MS_Description' where s.name = ? and t.name= ?";
 	private static final String  EXISTS_COLUMN_COMMENT_SQL = "select count(0) from sys.schemas s join sys.tables t on s.schema_id = t.schema_id join sys.columns c on t.object_id = c.object_id join sys.extended_properties ep on t.object_id = ep.major_id AND ep.minor_id = c.column_id and ep.name = 'MS_Description' where s.name = ? and t.name = ? and c.name = ? ";
 	private static final String  ADD_COLUMN_COMMENT_SQL = ADD_TABLE_COMMENT_SQL + ", 'column', ? ";
@@ -80,6 +92,15 @@ public class ModelDao {
 		useDatabase(database);
 		List<ModelMetadata> rows = jdbc.query(SQL_TABLES, BeanPropertyRowMapper.newInstance(ModelMetadata.class));
 		return rows;
+	}
+	
+	public String getDatabaseComment(String database) {
+		useDatabase(database);
+		String comment = null;
+		try{
+			comment = jdbc.queryForObject(SQL_DATABASE_COMMENT, String.class);
+		}catch(Exception e) {}
+		return comment;
 	}
 	
 	public List<ObjectComment> getComents(String database){
@@ -97,6 +118,25 @@ public class ModelDao {
 		return jdbc.query(SQL_FOREIGN_KEYS, BeanPropertyRowMapper.newInstance(ForeignKey.class));		
 	}
 	
+	public void updateDatabaseComment(String database, String comment) {
+		useDatabase(database);
+		boolean exists = jdbc.queryForObject(EXISTS_DATABASE_COMMENT_SQL, Integer.class) > 0;
+		if(exists) {
+			jdbc.update(UPDATE_DATABASE_COMMENT_SQL, comment);
+		}else {
+			jdbc.update(ADD_DATABASE_COMMENT_SQL, comment);
+		}
+	}
+	
+	public void updateSchemaComment(String database, String schema, String comment) {
+		useDatabase(database);
+		boolean exists = jdbc.queryForObject(EXISTS_SCHEMA_COMMENT_SQL, Integer.class, schema) > 0;
+		if(exists) {
+			jdbc.update(UPDATE_SCHEMA_COMMENT_SQL, comment, schema);
+		}else {
+			jdbc.update(ADD_SCHEMA_COMMENT_SQL, comment, schema);
+		}
+	}
 	
 	public void updateTableComment(String database, String schema, String table, String comment) {
 		useDatabase(database);
@@ -117,6 +157,7 @@ public class ModelDao {
 			jdbc.update(ADD_COLUMN_COMMENT_SQL, comment, schema, table, column);
 		}
 	}
+
 	
 	private void useDatabase(String database) {
 		if(!database.equals(currentDatabase)) {

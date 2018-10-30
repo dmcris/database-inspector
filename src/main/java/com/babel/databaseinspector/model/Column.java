@@ -16,6 +16,10 @@ public class Column {
 	private String fkReferencedTable;
 	private String fkReferencedColumn;
 	
+	/**
+	 * Crea una nueva columna con la información de metadata
+	 * @param metadata
+	 */
 	public void addItem(ModelMetadata metadata) {
 		this.columnName = metadata.getColumnName();
 		this.ordinalPosition = metadata.getOrdinalPosition();
@@ -27,6 +31,10 @@ public class Column {
 		this.isForeignKey = Boolean.FALSE;
 	}
 	
+	/**
+	 * Añade información a la columna
+	 * @param data
+	 */
 	public <X extends ColumnData>void addColumnData(X data) {
 		if(data instanceof ObjectComment)
 			this.comment = ((ObjectComment)data).getComment();
